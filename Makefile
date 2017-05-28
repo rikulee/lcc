@@ -1,44 +1,49 @@
-# GNU make手册：http://www.gnu.org/software/make/manual/make.html
-# ************ 遇到不明白的地方请google以及阅读手册 *************
+# Dirs
+SRC_DIR  := src
+INC_DIR  := include
+OUT_DIR  := out
+TEST_DIR := testcase
 
-# 编译器设定和编译选项
-CC = gcc
-FLEX = flex
-BISON = bison
-CFLAGS = -std=c99
+# Complier and flags
+CC      := gcc
+LEX     := flex
+YACC    := bison
+CFLAGS  := -I$(INC_DIR)
+LDFLAGS := -lfl -ly
 
-# 编译目标：src目录下的所有.c文件
-CFILES = $(shell find ./ -name "*.c")
-OBJS = $(CFILES:.c=.o)
-LFILE = $(shell find ./ -name "*.l")
-YFILE = $(shell find ./ -name "*.y")
-LFC = $(shell find ./ -name "*.l" | sed s/[^/]*\\.l/lex.yy.c/)
-YFC = $(shell find ./ -name "*.y" | sed s/[^/]*\\.y/syntax.tab.c/)
-LFO = $(LFC:.c=.o)
-YFO = $(YFC:.c=.o)
+#Files
+CFILES = $(wildcard $(SRC_DIR)/*.c)
+OBJS   = $(patsubst $(SRC_DIR)/%.c,$(OUT_DIR)/%.o,$(CFILES))
+LFILE  = $(wildcard $(SRC_DIR)/*.l)
+YFILE  = $(wildcard $(SRC_DIR)/*.y)
+LFC    = $(OUT_DIR)/lex.yy.c
+YFC    = $(OUT_DIR)/syntax.tab.c
+YFO    = $(YFC:.c=.o)
 
-parser: syntax $(filter-out $(LFO),$(OBJS))
-	$(CC) -o parser $(filter-out $(LFO),$(OBJS)) -lfl -ly
+# Targets
+all: lcc
+
+lcc: syntax $(filter-out $(YFO),$(OBJS))
+	$(CC) $(CFLAGS) -o $(OUT_DIR)/lcc $(filter-out $(YFO),$(OBJS)) $(YFO) $(LDFLAGS)
+
+$(OUT_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 syntax: lexical syntax-c
-	$(CC) -c $(YFC) -o $(YFO)
+	$(CC) $(CFLAGS) -c $(YFC) -o $(YFO)
 
 lexical: $(LFILE)
-	$(FLEX) -o $(LFC) $(LFILE)
+	$(shell mkdir -p $(OUT_DIR))
+	$(LEX) -o $(LFC) $(LFILE)
 
 syntax-c: $(YFILE)
-	$(BISON) -o $(YFC) -d -v $(YFILE)
+	$(YACC) -o $(YFC) -d -v $(YFILE)
 
--include $(patsubst %.o, %.d, $(OBJS))
-
-# 定义的一些伪目标
+# PHONY
 .PHONY: clean test
-test:
-	./parser ../Test/test.cmm
-run:
-	make clean && make && ./parser ../Test/test.cmm
+
 clean:
-	rm -f parser lex.yy.c syntax.tab.c syntax.tab.h syntax.output
-	rm -f $(OBJS) $(OBJS:.o=.d)
-	rm -f $(LFC) $(YFC) $(YFC:.c=.h)
-	rm -f *~
+	rm -rf $(OUT_DIR)
+
+test:
+	./out/lcc $(TEST_DIR)/test.cmm

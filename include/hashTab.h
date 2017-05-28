@@ -1,3 +1,5 @@
+#ifndef HASH_TABLE
+#define HASH_TABLE
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -116,3 +118,4 @@ u64 ht_add(htHeader* head, htElem *elem) {
             return 2;
     }
 }
+#endif
