@@ -1,7 +1,7 @@
 %locations
 %{
-    #include <stdio.h>
     #include <stdarg.h>
+    #include "common.h"
     #include "lex.yy.c"
 
 
@@ -16,7 +16,7 @@
 %}
 
 %code requires {
-    #include "mtNode.h"
+    #include "dS/mtNode.h"
 }
 
 %union {

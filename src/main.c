@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "common.h"
 
 extern void yyrestart(FILE*);
 extern int yyparse();

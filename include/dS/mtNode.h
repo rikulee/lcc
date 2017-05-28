@@ -1,5 +1,5 @@
-#ifndef MT_NODE
-#define MT_NODE
+#ifndef MT_NODE_H
+#define MT_NODE_H
 typedef enum TokenType { LU, GU } TokenType;
 
 typedef struct mtNode {
