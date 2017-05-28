@@ -1,8 +1,7 @@
 %option yylineno
 
 %{
-    #include <stdlib.h>
-    #include <string.h>
+    #include "common.h"
     #include "syntax.tab.h"
 
     #define YY_NO_INPUT

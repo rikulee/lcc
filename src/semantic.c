@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include "hashTab.h"
+#include "dS/hashTab.h"
 
 extern mtNode *root;
 
