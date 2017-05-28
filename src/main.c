@@ -3,7 +3,7 @@
 extern void yyrestart(FILE*);
 extern int yyparse();
 extern void mt_print();
-extern void se_debug();
+extern void se_analyze();
 
 int main(int argc, char** argv) {
     if (argc <= 1) return 1;
@@ -14,8 +14,7 @@ int main(int argc, char** argv) {
     }
     yyrestart(f);
     if (!yyparse()) {
-        /* mt_print(); */
-        se_debug();
+        se_analyze();
     }
     return 0;
 }

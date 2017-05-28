@@ -1,49 +1,60 @@
 # Dirs
-SRC_DIR  := src
-INC_DIR  := include
-OUT_DIR  := out
-TEST_DIR := testcase
+DIR_SRC  := src
+DIR_INC  := include
+DIR_OBJ  := obj
+DIR_BIN  := bin
+DIR_TEST := testcase
+
+DIR_CRT  := $(shell mkdir -p $(DIR_OBJ) $(DIR_BIN))
 
 # Complier and flags
 CC      := gcc
 LEX     := flex
 YACC    := bison
-CFLAGS  := -I$(INC_DIR)
+CFLAGS  := -g -O2 -Wall -I$(DIR_INC)
 LDFLAGS := -lfl -ly
 
 #Files
-CFILES = $(wildcard $(SRC_DIR)/*.c)
-OBJS   = $(patsubst $(SRC_DIR)/%.c,$(OUT_DIR)/%.o,$(CFILES))
-LFILE  = $(wildcard $(SRC_DIR)/*.l)
-YFILE  = $(wildcard $(SRC_DIR)/*.y)
-LFC    = $(OUT_DIR)/lex.yy.c
-YFC    = $(OUT_DIR)/syntax.tab.c
-YFO    = $(YFC:.c=.o)
+TARGET     = lcc
+BIN_TARGET = $(DIR_BIN)/$(TARGET)
+SRCS       = $(shell find $(DIR_SRC) -name "*.c")
+OBJS       = $(patsubst $(DIR_SRC)/%.c,$(DIR_OBJ)/%.o,$(SRCS))
+LFILE      = $(shell find $(DIR_SRC) -name "*.l")
+YFILE      = $(shell find $(DIR_SRC) -name "*.y")
+LFC        = $(DIR_OBJ)/lex.yy.c
+YFC        = $(DIR_OBJ)/syntax.tab.c
+YFO        = $(YFC:.c=.o)
 
 # Targets
-all: lcc
+$(BIN_TARGET): syntax $(OBJS)
+	@echo "Generating $@ ..."
+	@$(CC) $(CFLAGS) -o $@ $(OBJS) $(YFO) $(LDFLAGS)
 
-lcc: syntax $(filter-out $(YFO),$(OBJS))
-	$(CC) $(CFLAGS) -o $(OUT_DIR)/lcc $(filter-out $(YFO),$(OBJS)) $(YFO) $(LDFLAGS)
-
-$(OUT_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(DIR_OBJ)/%.o: $(DIR_SRC)/%.c
+	@echo "Compiling  $< ..."
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) -o $@ -c $<
 
 syntax: lexical syntax-c
-	$(CC) $(CFLAGS) -c $(YFC) -o $(YFO)
+	@echo "Compiling  $(YFC) ..."
+	@$(CC) $(CFLAGS) -o $(YFO) -c $(YFC)
 
 lexical: $(LFILE)
-	$(shell mkdir -p $(OUT_DIR))
-	$(LEX) -o $(LFC) $(LFILE)
+	@echo "Compiling  $< ..."
+	@$(LEX) -o $(LFC) $(LFILE)
 
 syntax-c: $(YFILE)
-	$(YACC) -o $(YFC) -d -v $(YFILE)
+	@echo "Compiling  $< ..."
+	@$(YACC) -o $(YFC) -d -v $(YFILE)
 
 # PHONY
 .PHONY: clean test
 
 clean:
-	rm -rf $(OUT_DIR)
+	@echo "Cleaning obj/ ..."
+	@rm -rf $(DIR_OBJ)
+	@echo "Cleaning bin/ ..."
+	@rm -rf $(DIR_BIN)
 
 test:
-	./out/lcc $(TEST_DIR)/test.cmm
+	$(BIN_TARGET) $(DIR_TEST)/test.cmm

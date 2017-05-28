@@ -5,45 +5,41 @@ extern mtNode *root;
 
 void se_analyze();
 
-void mt_walk(mtNode *, htHeader *);
+static void mt_walk(mtNode *, htHeader *);
 
-void draw_ExtDef(mtNode *, htElem *);
-void draw_Specifier(mtNode *, htElem *);
-void draw_Struct(mtNode *, htElem *);
-void draw_FunDec(mtNode *, htElem *);
-void draw_Def(mtNode *, htElem *);
-void draw_DecList(mtNode *, htElem *);
-void draw_Dec(mtNode *, htElem *);
-void draw_VarDec(mtNode *, htElem *);
-void draw_VarList(mtNode *, htElem *);
-void draw_ParamDec(mtNode *, htElem *);
-types *check_Exp(mtNode *, htHeader *);
-types *check_ID(mtNode *, htHeader *);
-types *check_INT(mtNode *, htHeader *);
-types *check_FLOAT(mtNode *, htHeader *);
-types *check_FUN(mtNode *, htHeader *);
-types *check_ARRAY(mtNode *, htHeader *);
-types *check_1OP1(mtNode *, types *, types *);
-types *check_1BOOL1(mtNode *, types *, types *);
-types *check_NOT1(mtNode *, types *);
-types *check_MINUS1(mtNode *, types *);
-types *check_1DOT1(mtNode *, mtNode *);
-
-void se_debug() {
-    se_analyze();
-}
+static void draw_ExtDef(mtNode *, htElem *);
+static void draw_Specifier(mtNode *, htElem *);
+static void draw_Struct(mtNode *, htElem *);
+static void draw_FunDec(mtNode *, htElem *);
+static void draw_Def(mtNode *, htElem *);
+static void draw_DecList(mtNode *, htElem *);
+static void draw_Dec(mtNode *, htElem *);
+static void draw_VarDec(mtNode *, htElem *);
+static void draw_VarList(mtNode *, htElem *);
+static void draw_ParamDec(mtNode *, htElem *);
+static types *check_Exp(mtNode *, htHeader *);
+static types *check_ID(mtNode *, htHeader *);
+static types *check_INT(mtNode *, htHeader *);
+static types *check_FLOAT(mtNode *, htHeader *);
+static types *check_FUN(mtNode *, htHeader *);
+static types *check_ARRAY(mtNode *, htHeader *);
+static types *check_1OP1(mtNode *, types *, types *);
+static types *check_1BOOL1(mtNode *, types *, types *);
+/* static types *check_NOT1(mtNode *, types *); */
+/* static types *check_MINUS1(mtNode *, types *); */
+/* static types *check_1DOT1(mtNode *, mtNode *); */
 
 void se_analyze() {
     htHeader *head = ht_init();
     mt_walk(root, head);
 }
 
-void draw_ParamDec(mtNode *node, htElem *elem) {
+static void draw_ParamDec(mtNode *node, htElem *elem) {
     draw_Specifier(node->child[0], elem);
     draw_VarDec(node->child[1], elem);
 }
 
-void draw_VarList(mtNode *node, htElem *elem) {
+static void draw_VarList(mtNode *node, htElem *elem) {
     htElem *_tmp = (htElem *)malloc(sizeof(htElem));
     htElem_init(_tmp);
     _tmp->kind = VAR;
@@ -54,7 +50,7 @@ void draw_VarList(mtNode *node, htElem *elem) {
     }
 }
 
-void draw_VarDec(mtNode *node, htElem *elem) {
+static void draw_VarDec(mtNode *node, htElem *elem) {
     if (node->child_max == 1) {
         elem->uID =(char *)malloc(sizeof(char) * strlen(node->child[0]->extra) + 1);
         strcpy(elem->uID, node->child[0]->extra);
@@ -72,11 +68,11 @@ void draw_VarDec(mtNode *node, htElem *elem) {
     }
 }
 
-void draw_Dec(mtNode *node, htElem *elem) {
+static void draw_Dec(mtNode *node, htElem *elem) {
     draw_VarDec(node->child[0], elem);
 }
 
-void draw_DecList(mtNode *node, htElem *elem) {
+static void draw_DecList(mtNode *node, htElem *elem) {
     draw_Dec(node->child[0], elem);
     if (node->child_max > 1) {
         htElem *_tmp=(htElem *)malloc(sizeof(htElem));
@@ -87,16 +83,16 @@ void draw_DecList(mtNode *node, htElem *elem) {
     }
 }
 
-void draw_Def(mtNode *node, htElem *elem) {
+static void draw_Def(mtNode *node, htElem *elem) {
     draw_Specifier(node->child[0], elem);
     draw_DecList(node->child[1], elem);
 }
 
-void draw_Struct(mtNode *node, htElem *elem) {
+static void draw_Struct(mtNode *node, htElem *elem) {
 
 }
 
-void draw_Specifier(mtNode *node, htElem *elem) {
+static void draw_Specifier(mtNode *node, htElem *elem) {
     char *pattern = node->child[0]->text;
     if (strcmp(pattern, "TYPE") == 0) {
         elem->basic_type.type = BASIC;
@@ -111,7 +107,7 @@ void draw_Specifier(mtNode *node, htElem *elem) {
     }
 }
 
-void draw_FunDec(mtNode *node, htElem *elem) {
+static void draw_FunDec(mtNode *node, htElem *elem) {
     char *uID = node->child[0]->extra;
     elem->uID = (char *)malloc(sizeof(char) * strlen(uID) + 1);
     strcpy(elem->uID, uID);
@@ -121,7 +117,7 @@ void draw_FunDec(mtNode *node, htElem *elem) {
     }
 }
 
-void draw_ExtDef(mtNode *node, htElem *elem) {
+static void draw_ExtDef(mtNode *node, htElem *elem) {
     draw_Specifier(node->child[0], elem);
     char *pattern = node->child[1]->text;
     if (strcmp(pattern, "FunDec") == 0) {
@@ -130,7 +126,7 @@ void draw_ExtDef(mtNode *node, htElem *elem) {
     }
 }
 
-types *check_ARRAY(mtNode *node, htHeader *head) {
+static types *check_ARRAY(mtNode *node, htHeader *head) {
     types *type0 = check_Exp(node->child[0], head);
     types *type1 = check_Exp(node->child[2], head);
     if (type1->type == BASIC && type1->extra.basic == 0) {
@@ -140,9 +136,10 @@ types *check_ARRAY(mtNode *node, htHeader *head) {
     } else {
         printf("Error type 12 at Line %d: [x] is not a integer.\n", node->child[2]->lineno);
     }
+    return NULL;
 }
 
-types *check_FUN(mtNode *node, htHeader *head) {
+static types *check_FUN(mtNode *node, htHeader *head) {
     htElem *elem = (htElem *)malloc(sizeof(htElem));
     u64 _flag = ht_find(head, node->child[0]->extra, elem);
     if (_flag != 0) {
@@ -153,9 +150,10 @@ types *check_FUN(mtNode *node, htHeader *head) {
         } else {
         }
     }
+    return NULL;
 }
 
-types *check_ID(mtNode *node, htHeader *head) {
+static types *check_ID(mtNode *node, htHeader *head) {
     htElem *elem = (htElem *)malloc(sizeof(htElem));
     u64 _flag = ht_find(head, node->extra, elem);
     if (_flag == 0) {
@@ -166,21 +164,21 @@ types *check_ID(mtNode *node, htHeader *head) {
     }
 }
 
-types *check_INT(mtNode* node, htHeader *head) {
+static types *check_INT(mtNode* node, htHeader *head) {
     types *type = (types *)malloc(sizeof(types));
     type->type = BASIC;
     type->extra.basic = 0;
     return type;
 }
 
-types *check_FLOAT(mtNode* node, htHeader *head) {
+static types *check_FLOAT(mtNode* node, htHeader *head) {
     types *type = (types *)malloc(sizeof(types));
     type->type = BASIC;
     type->extra.basic = 1;
     return type;
 }
 
-types *check_1OP1(mtNode *node, types *type0, types *type1) {
+static types *check_1OP1(mtNode *node, types *type0, types *type1) {
     if (type0 == NULL || type1 == NULL)
         return NULL;
     if (strcmp(node->child[1]->text, "ASSIGNOP") == 0) {
@@ -218,7 +216,7 @@ types *check_1OP1(mtNode *node, types *type0, types *type1) {
     return type0;
 }
 
-types *check_1BOOL1(mtNode *node, types *type0, types *type1) {
+static types *check_1BOOL1(mtNode *node, types *type0, types *type1) {
     if (type0 == NULL || type1 == NULL)
         return NULL;
     if (type0->type == BASIC
@@ -232,7 +230,7 @@ types *check_1BOOL1(mtNode *node, types *type0, types *type1) {
     }
 }
 
-types *check_Exp(mtNode *node, htHeader *head) {
+static types *check_Exp(mtNode *node, htHeader *head) {
     int _mode = node->child_max;
     switch(_mode) {
         case 1:
@@ -291,7 +289,7 @@ types *check_Exp(mtNode *node, htHeader *head) {
     return NULL;
 }
 
-void mt_walk(mtNode *node, htHeader *head) {
+static void mt_walk(mtNode *node, htHeader *head) {
     if (strcmp(node->text, "ExtDef") == 0) {
         htElem elem;
         htElem_init(&elem);

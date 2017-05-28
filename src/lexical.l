@@ -5,6 +5,9 @@
     #include <string.h>
     #include "syntax.tab.h"
 
+    #define YY_NO_INPUT
+    #define YY_NO_UNPUT
+
     int yycolumn = 1;
     int is_lexical_error = 0;
     #define YY_USER_ACTION \

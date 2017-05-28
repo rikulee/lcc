@@ -9,10 +9,10 @@
 
 
     mtNode *root;
-    mtNode *mtChild(char *, int, int, mtNode*, ...);
-    void mt_p(mtNode *, int);
+    static mtNode *mtChild(char *, int, int, mtNode*, ...);
+    static void mt_p(mtNode *, int);
     void mt_print();
-    void yyerror(char *);
+    static void yyerror(char *);
 %}
 
 %code requires {
@@ -178,7 +178,7 @@ Args: Exp COMMA Args    { $$ = mtChild("Args", @1.first_line, 3, $1, $2, $3); }
     ;
 
 %%
-mtNode *mtChild(char *token, int lineno, int n, mtNode* node, ...) {
+static mtNode *mtChild(char *token, int lineno, int n, mtNode* node, ...) {
     va_list ap;
     mtNode *father_node = (mtNode *)malloc(sizeof(mtNode));
     father_node->type = GU;
@@ -199,7 +199,7 @@ mtNode *mtChild(char *token, int lineno, int n, mtNode* node, ...) {
     return father_node;
 }
 
-void mt_p(mtNode *node, int level) {
+static void mt_p(mtNode *node, int level) {
     if (strcmp(node->text, "Epsilon") != 0) {
         for (int i = 0; i < 2 * level; i++) {
             printf(" ");
@@ -224,6 +224,6 @@ void mt_print() {
         mt_p(root, 0);
 }
 
-void yyerror(char *text) {
+static void yyerror(char *text) {
     fprintf(stderr, "Error type B at Line %d: %s\n", yylloc.first_line, text);
 }

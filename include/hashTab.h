@@ -55,7 +55,7 @@ u64 ht_hash(char *name) {
     u64 val = 0, i;
     for (; *name; ++name) {
         val = (val << 2) + *name;
-        if (i = val & ~TAB_MAX_VOL)
+        if ((i = (val & ~TAB_MAX_VOL)))
             val = (val ^ (i >> 12)) & TAB_MAX_VOL;
     }
     return val;
@@ -68,6 +68,8 @@ htHeader *ht_init() {
         head[i].tail = NULL;
         head[i].next = NULL;
     }
+
+    return head;
 }
 
 /* 0 -> 在HashTable里面找到了该元素 */
